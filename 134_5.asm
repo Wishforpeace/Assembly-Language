@@ -1,0 +1,63 @@
+.386
+SUB_PROGRAM SGEMENT USE16
+    ASSUME CS:SUB_PROGRAM
+SORT PROC FAR
+    PUSH BX
+    PUSH DX
+    PUSH SI
+    PUSH DI
+    
+    
+    MOV DX,CX
+    DEC DX;DX是数组长度，最后一个值不需要索引
+    MOV SI,0
+LOOP1:
+    MOV AL,[BX+SI]
+    MOV DI,SI+1
+LOOP2:
+    CMP AL,[BX+DI]
+    JBE NEXT
+    XCHG AL,[BX+DI]
+    MOV [BX+SI],AL
+NEXT:
+    INC DI
+    CMP DI,DX
+    JBE LOOP2
+    INC SI
+    CMP SI,DX
+    JBE LOOP1
+
+
+    POP DI
+    POP SI
+    POP DX
+    POP BX
+SORT ENDP
+SUB_PROGRAM ENDS
+
+
+STACK SEGMENT USE16 STACK
+          DB 50 DUP(0)
+STACK ENDS
+
+DATA SEGMENT USE16
+    BUF1 DB 30H,10H,40H,20H,50H,70H,60H,90H,80H,0,0FFH
+    N1   =  $-BUF1
+    BUF2 DB 22H,11H,33H,55H,44H,77H,66H,99H,88H,0AAH,0EEH,0
+N2= $ - BUF2
+DATA ENDS
+
+CODE SEGMENT USE16
+          ASSUME CS:CODE,SS:STACK,DS:DATA
+    BEGIN:
+          MOV    AX,DATA
+          MOV    DS,AX
+          MOV    CX ,N1
+          LEA    BX,BUF1
+          CALL   FAR PTR SORT
+          LEA    BX,BUF2
+          CALL   FAR PTR SORT
+          MOV    AX,4CH
+          INT    21H
+CODE ENDS
+    END BEGIN
